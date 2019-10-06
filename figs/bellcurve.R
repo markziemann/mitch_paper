@@ -1,0 +1,5 @@
+pdf("bellcurve.pdf")
+log2FC<-rnorm(1000000) 
+hist(w,freq=F,xlim=c(-3,3))
+curve(dnorm,-3,3,add=T,col="blue")
+dev.off()

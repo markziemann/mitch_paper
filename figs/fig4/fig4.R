@@ -54,7 +54,7 @@ lrt <- glmLRT(fit)
 res_edger_glmrt<-as.data.frame(topTags(lrt,n=Inf))
 rnk_edger_glmrt<-as.data.frame( sign(res_edger_glmrt$logFC) * -log10(res_edger_glmrt$PValue))
 rownames(rnk_edger_glmrt)<-rownames(res_edger_glmrt)
-colnames(rnk_edger_glmrt)<-"edgeR_GLMRT"
+colnames(rnk_edger_glmrt)<-"edgeR_glmLRT"
 rnk_edger_glmrt$geneID<-rownames(rnk_edger_glmrt)
 
 # edgeR QL
@@ -102,7 +102,7 @@ gt<-gt[which(gt$geneID %in% rownames(tx1)),]
 
 # join the tables together
 xx<-join_all(list("symbol"=gt,"DESeq2"=rnk_deseq2,
-  "edgeR_GLMRT"=rnk_edger_glmrt,
+  "edgeR_glmLRT"=rnk_edger_glmrt,
   "edgeR_QL"=rnk_edger_ql,"voom-limma"=rnk_voom_limma,
   "ABSSeq"=rnk_absseq),by="geneID")
 
@@ -121,7 +121,7 @@ unzip("ReactomePathways.gmt.zip")
 genesets<-gmt_import("ReactomePathways.gmt")
 
 # run mitch analysis
-res<-mitch_calc(xx,genesets,resrows=20,priority="effect")
+res<-mitch_calc(xx,genesets,resrows=20,bootstraps=1000,priority="effect")
 
 mitch_plots(res,outfile="fig4_plots.pdf")
 mitch_report(res,"fig4_report.html")
@@ -138,7 +138,7 @@ sets_voom_limma<-res$manova_res[which(p.adjust(res$manova_res$p.voom_limma)<0.05
 
 # barplt of number of DE sets
 my_lengths<-unlist(lapply(list("ABSSeq"=sets_absseq,"voom-limma"=sets_voom_limma,
-  "edgeR GLMRT"=sets_edger_glmrt,"edgeR QL"=sets_edger_ql,"DESeq2"=sets_deseq2),length))
+  "edgeR glmLRT"=sets_edger_glmrt,"edgeR QL"=sets_edger_ql,"DESeq2"=sets_deseq2),length))
 
 par(mar=c(5,10,4,2))
 bp<-barplot(my_lengths,xlab="no. sets FDR<0.05",las=1,horiz=T,xlim=c(0,200))
@@ -177,7 +177,7 @@ my_palette <- colorRampPalette(c("blue", "white", "red"))(n = 25)
 heatmap.2(as.matrix(res_subset[1:10,4:8]),scale="row",margin=c(15, 15),cexRow=0.8,trace="none",cexCol=0.8,col=my_palette)
 
 
-res_list<-list("ABSSeq"=sets_absseq,"voom-limma"=sets_voom_limma,"edgeR GLMRT"=sets_edger_glmrt,"edgeR QL"=sets_edger_ql,"DESeq2"=sets_deseq2)
+res_list<-list("ABSSeq"=sets_absseq,"voom-limma"=sets_voom_limma,"edgeR glmLRT"=sets_edger_glmrt,"edgeR QL"=sets_edger_ql,"DESeq2"=sets_deseq2)
 res_list<-lapply(res_list, function(x){
  data.frame(
   list=x,
@@ -193,7 +193,7 @@ res_df3<-res_df2[,c(ncol(res_df2),1:(ncol(res_df2)-1))]
 upset(res_df3,order.by = "freq",text.scale=2)
 
 subset_genesets<-genesets[which(names(genesets) %in% res_subset$set )]
-res2<-mitch_calc(xx,subset_genesets,resrows=20,priority="effect")
+res2<-mitch_calc(xx,subset_genesets,resrows=20,bootstraps=1000,priority="effect")
 
 heatmap.2(res2$detailed_sets$`Peptide chain elongation`,scale="row",col=my_palette,margin=c(12, 12),trace="none",main='Peptide chain elongation')
 par(mar=c(5,10,4,2))

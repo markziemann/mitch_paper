@@ -30,7 +30,7 @@ rownames(pol2ra)<-sapply(strsplit(rownames(pol2ra),"\\."),"[[",1)
 rna<-read.table("rna_res.tsv")
 rownames(rna)<-sapply(strsplit(rownames(rna),"\\."),"[[",1)
 
-x<-list("ctcf"=ctcf,"h3k4me3"=h3k4me3,"nr3c1"=nr3c1,"pol2ra"=pol2ra,"rna"=rna)
+x<-list("CTCF"=ctcf,"H3K4me3"=h3k4me3,"NR3C1"=nr3c1,"POL2RA"=pol2ra,"ATAC"=atac,"RNA"=rna)
 
 
 #x<-list("ctcf"=ctcf,"h3k4me3"=h3k4me3,"nr3c1"=nr3c1,"pol2ra"=pol2ra,"rna"=rna)
@@ -40,11 +40,11 @@ x<-list("ctcf"=ctcf,"h3k4me3"=h3k4me3,"nr3c1"=nr3c1,"pol2ra"=pol2ra,"rna"=rna)
 y<-mitch_import(x, DEtype="deseq2" , geneTable = gt)
 
 
-res<-mitch_calc(y,genesets,resrows=50,priority="confidence")
+res<-mitch_calc(y,genesets,resrows=50,bootstraps=1000,priority="confidence")
 
 mitch_plots(res,outfile="a549_res_conf.pdf")
 
-res<-mitch_calc(y,genesets,resrows=50,priority="significance")
+res<-mitch_calc(y,genesets,resrows=50,bootstraps=1000,priority="significance")
 
 mitch_plots(res,outfile="a549_res_sig.pdf")
 

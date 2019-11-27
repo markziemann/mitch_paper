@@ -151,19 +151,21 @@ pdf("res.pdf")
 
 plot(md1pc$SD,md1pc$Rec,type="b", ylim=c(0.94,1),xlab="SD",col="blue",
   ylab="recall / precision / F1", main="1% FDR")
+grid()
 points(md1pc$SD,md1pc$Prec,type="b",col="red")
 points(md1pc$SD,md1pc$F1,type="b",col="black") 
 
 legend("bottomright", legend=c("recall", "precision", "F1 score"),
-       col=c("blue", "red", "black"), lty=1, cex=1)
+       col=c("blue", "red", "black"), lty=1, cex=1, inset =0.1)
 
 plot(md5pc$SD,md5pc$Rec,type="b", ylim=c(0.85,1),xlab="SD",col="blue",
   ylab="recall / precision / F1", main="5% FDR")
+grid()
 points(md5pc$SD,md5pc$Prec,type="b",col="red")
 points(md5pc$SD,md5pc$F1,type="b",col="black") 
 
 legend("bottomright", legend=c("recall", "precision", "F1 score"),
-       col=c("blue", "red", "black"), lty=1, cex=1)
+       col=c("blue", "red", "black"), lty=1, cex=1, inset=0.1)
 
 dev.off()
 

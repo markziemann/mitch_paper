@@ -1,13 +1,13 @@
 # suplementary figure to determine whether the dip in mitch precision
 # at 0.05 is important or not.
 
-myres<-res$manova_result
+myres<-res$enrichment_result
 all<-apply(myres[,4:9],1,function(x) {mean(abs(x)) })
 
-myres<-subset(res$manova_result,p.adjustMANOVA<0.05 )
+myres<-subset(res$enrichment_result,p.adjustMANOVA<0.05 )
 sig<-apply(myres[,4:9],1,function(x) {mean(abs(x)) })
 
-myres<-subset(res$manova_result,p.adjustMANOVA>0.05 )
+myres<-subset(res$enrichment_result,p.adjustMANOVA>0.05 )
 nsig<-apply(myres[,4:9],1,function(x) {mean(abs(x)) })
 
 sig_gt=length(which(sig>0.08))

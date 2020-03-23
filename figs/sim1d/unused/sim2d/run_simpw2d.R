@@ -1,3 +1,4 @@
+
 library("tidyverse")
 library("parallel")
 library("topconfects")
@@ -29,17 +30,11 @@ test_simpw2d<-function(){
  # run mitch
  x<-run_mitch(x,DGE_FUNC,gsets, N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
 
- # run phyper
- x<-run_hypergeometric(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
-
  # run fgsea
  x<-run_fgsea(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
 
- # run geneSetTest
- x<-run_gst(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
-
  # run mdgsa
- x<-run_mdgsa(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
+# x<-run_mdgsa(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
 
  # look at the results
  str(x)
@@ -55,12 +50,12 @@ test_simpw2d<-function(){
 SIMS=10
 unlink("simpw2d_res_running.tsv")
 res=NULL
-for ( FRAC_DE in c(0.2)) {
+for ( FRAC_DE in c(0.05)) {
   for (FC in c(1)) {
     for (N_REPS in c(3)) {
       for (DGE_FUNC in c("deseq2")) {
-        for ( SUM_COUNT in c(10000000,40000000,100000000)) {
-          for  ( VARIANCE in c(0,0.3,0.6)) {
+        for ( SUM_COUNT in c( 40000000 )) {
+          for  ( VARIANCE in c(0.3)) {
             x<-agg_dge(a,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,SIMS,DGE_FUNC,gsets)
             write.table(x,file="simpw2d_res_running.tsv",quote=F,sep='\t',append=T)
             res=c(res,x)

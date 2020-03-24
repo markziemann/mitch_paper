@@ -1,13 +1,12 @@
 library("tidyverse")
 library("parallel")
-library("topconfects")
-library("edgeR")
 library("DESeq2")
-library("limma")
-library("ABSSeq")
 library("stringi")
 library("mitch")
 library("fgsea")
+library("mdgsea")
+library("MAVTgsa")
+library("edgeR")
 
 ########################################
 # get some counts
@@ -44,12 +43,8 @@ gsets
 ########################################
 simrna2d<-function(a,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,gsets) {
 # x<-simrna2d(a,3,10000000,0.2,0.2,1,gsets)
- N_REPS=3 ; SUM_COUNT=10000000 ; VARIANCE=0.3 ; FRAC_DE=0.1 ; FC=1 
-
-library("edgeR")
-
+# N_REPS=3 ; SUM_COUNT=10000000 ; VARIANCE=0.3 ; FRAC_DE=0.1 ; FC=1 
 NUM_SAMPLE_GROUPS=3
-
 df = NULL
 for (k in paste0("data",1:(N_REPS*3)))  {
         b <- thinCounts(a,target.size = SUM_COUNT)
@@ -62,13 +57,9 @@ gsets_sub <- which(unlist( lapply(gsets,function(x) {
   length(which(rownames(a) %in% as.character(unlist(x)))) >10 
 }  ) ) )
 gsets <- gsets[which(names(gsets) %in% names(gsets_sub))]
-
 #Number of differential genes
 NDIF = round(length(gsets)*FRAC_DE)
-
-###########################################
 # introduce some variance here
-###########################################
 if (VARIANCE>0) {
   #create some random values centred around 1 with some% error
   rand <- matrix(log2(rnorm(nrow(a)*N_REPS * NUM_SAMPLE_GROUPS , 2, VARIANCE)),
@@ -79,23 +70,17 @@ if (VARIANCE>0) {
   df <- apply(df, 2, function(x) {ifelse(x < 0, 0, x)})
 }
 
-###########################################
 # prepare some fold changes
-###########################################
-
 if (NDIF>0) {
   message("prep fold changes")
   # Make NDIF a multiple of 4
   if ( NDIF %% 2 == 1 ) { print("odd") ; NDIF = NDIF-1 }
   if ( NDIF %% 4 == 2 ) { print("not multiple of 4") ; NDIF = NDIF-2 }
-
   # select some sets to be DE
   DE_LIST <- sample(gsets , NDIF)
-
   # we have gene sets can be in segments 1 to 4 or 6 to 9.
   MYSAMPLE = sample(c(1,2,3,4,6,7,8,9), NDIF, replace = TRUE)
   names(MYSAMPLE) <- names(DE_LIST)
-
   # define upreg genes in contrast 1
   UP_LIST1 <- DE_LIST[which(MYSAMPLE%%3==0)]
   # now find a list of genes inside the pathways
@@ -126,7 +111,6 @@ if (NDIF>0) {
   NON_DE1$FC = 1
   ALL_DE1 <- rbind(ALL_DE1,NON_DE1)
   ALL_DE1 <- data.frame(ALL_DE1[ order(as.vector(ALL_DE1$Gene)) , ])
-
   # now DE2
   UP_LIST2 <- DE_LIST[which(MYSAMPLE<4)]
   UP_DE2 <- unique(unlist(unname(UP_LIST2)))
@@ -151,7 +135,6 @@ if (NDIF>0) {
   NON_DE2$FC = 1
   ALL_DE2 <- rbind(ALL_DE2,NON_DE2)
   ALL_DE2 <- data.frame(ALL_DE2[ order(as.vector(ALL_DE2$Gene)) , ])
-
   message("incorporate changes")
   df <- df[ order(row.names(df)), ]
 } else {
@@ -165,7 +148,6 @@ if (NDIF>0) {
 ONE_IDX_COLS = (1:ncol(df))[c(TRUE,FALSE,FALSE)]
 TWO_IDX_COLS = (1:ncol(df))[c(FALSE,TRUE,FALSE)]
 THREE_IDX_COLS = (1:ncol(df))[c(FALSE,FALSE,TRUE)]
-
 controls1 <- df[,ONE_IDX_COLS]
 colnames(controls1) = paste0( "ctrl1_" ,1:ncol(controls1) )
 treatments1 <- round(df[,TWO_IDX_COLS]*ALL_DE1$FC)
@@ -178,7 +160,6 @@ x <- x[which(rowSums(x)/ncol(x)>10),]
 x <- as.data.frame(x)
 UP_DE1 <- intersect(UP_DE1,rownames(x)) ; DN_DE1 <- intersect(DN_DE1,rownames(x))
 UP_DE2 <- intersect(UP_DE2,rownames(x)) ; DN_DE2 <- intersect(DN_DE2,rownames(x))
-
 xx <- list("x" = x, "truth" = MYSAMPLE)
 xx
 }
@@ -196,65 +177,6 @@ RepParallel <- function(n, expr, simplify = "array",...) {
     }
 # RepParallel usage
 #xxx<-RepParallel(10,simrna(a,5,10000000,0.2,20), simplify=F, mc.cores = detectCores() )
-
-#################################################
-# define edgeR classic function
-##################################################
-edger <- function(x) {
-library("limma")
-library("edgeR")
-res=NULL
-label="simulate"
-y <- x[[1]]
-samplesheet <- as.data.frame(colnames(y))
-colnames(samplesheet) = "sample"
-
-#sapply(strsplit(as.character(samplesheet$sample),"_"),"[[",1)
-y1 <- y[,c(grep("ctrl1",samplesheet$sample), grep("trt1",samplesheet$sample)) ]
-samplesheet1 <- as.data.frame(colnames(y1))
-colnames(samplesheet1) = "sample"
-samplesheet1$trt <- as.numeric(grepl("trt",colnames(y1)))
-design1 <- model.matrix(~samplesheet1$trt)
-rownames(design1) = samplesheet1$sample
-# run DGE
-y1 <- y1[which(rowSums(y1)/ncol(y1)>=(10)),]
-z <- DGEList(counts=y1)
-z <- calcNormFactors(z)
-z <- estimateDisp(z, design1,robust=TRUE,prior.df=1)
-fit <- glmFit(z, design1)
-lrt <- glmLRT(fit)
-de <- as.data.frame(topTags(lrt,n=Ifnf))
-de$dispersion <- lrt$dispersion
-de <- de[order(de$PValue),]
-x[[6]] <- de
-sig <- subset(de,FDR<0.05)
-x[[7]] <- rownames(sig[which(sig$logFC>0),])
-x[[8]] <- rownames(sig[which(sig$logFC<0),])
-
-#sapply(strsplit(as.character(samplesheet$sample),"_"),"[[",1)
-y2 <- y[,c(grep("ctrl1",samplesheet$sample), grep("trt2",samplesheet$sample)) ]
-samplesheet2 <- as.data.frame(colnames(y2))
-colnames(samplesheet2) = "sample"
-samplesheet2$trt <- as.numeric(grepl("trt",colnames(y2)))
-design2 <- model.matrix(~samplesheet2$trt)
-rownames(design2) = samplesheet2$sample
-# run DGE
-y2 <- y2[which(rowSums(y2)/ncol(y2)>=(10)),]
-z <- DGEList(counts=y2)
-z <- calcNormFactors(z)
-z <- estimateDisp(z, design1,robust=TRUE,prior.df=1)
-fit <- glmFit(z, design1)
-lrt <- glmLRT(fit)
-de <- as.data.frame(topTags(lrt,n=Inf))
-de$dispersion <- lrt$dispersion
-de <- de[order(de$PValue),]
-x[[9]] <- de
-sig <- subset(de,FDR<0.05)
-x[[10]] <- rownames(sig[which(sig$logFC>0),])
-x[[11]] <- rownames(sig[which(sig$logFC<0),])
-names(x)[6:11] <- c("DGE1","DGE1_up","DGE1_dn","DGE2","DGE2_up","DGE2_dn")
-x
-}
 
 #################################################
 # define DESeq2 2D function
@@ -314,12 +236,11 @@ true_pos=length(intersect(mitch_sig , gt ))
 false_pos=length(setdiff( mitch_sig, gt  ))
 false_neg=length(setdiff(gt , mitch_sig ))
 true_neg=length(gsets)-sum(true_pos,false_pos,false_neg)
-
 p<-true_pos/(true_pos+false_pos)
 r<-true_pos/(true_pos+false_neg)
 f<-2*p*r/(p+r)
-
-attr(x,'mitch_res') <-data.frame(N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,DGE_FUNC,true_pos,false_pos,true_neg,false_neg,p,r,f)
+attr(x,'mitch_res') <-data.frame(N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,DGE_FUNC,
+  true_pos,false_pos,true_neg,false_neg,p,r,f)
 x
 }
 
@@ -327,7 +248,6 @@ x
 # FGSEA function
 ##################################
 run_fgsea <- function(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC){
-
 dge1 <- x[[6]]
 dge2 <- x[[9]]
 s1 <- dge1$stat
@@ -344,12 +264,11 @@ true_pos = length(intersect( obs , gt ))
 false_pos = length(setdiff(obs , gt ))
 false_neg = length(setdiff(gt , obs ))
 true_neg=length(gsets)-sum(true_pos,false_pos,false_neg)
-
 p<-true_pos/(true_pos+false_pos)
 r<-true_pos/(true_pos+false_neg)
 f<-2*p*r/(p+r)
-
-attr(x,'fgsea_res') <-data.frame(N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,DGE_FUNC,true_pos,false_pos,true_neg,false_neg,p,r,f)
+attr(x,'fgsea_res') <-data.frame(N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,DGE_FUNC,
+  true_pos,false_pos,true_neg,false_neg,p,r,f)
 x
 }
 
@@ -361,56 +280,44 @@ library("mdgsa")
 dge1<-x[[6]]
 dge2<-x[[9]]
 dge<-list("dge1"=dge1,"dge2"=dge2)
-
 w<-mitch_import(dge, DGE_FUNC )
-
-w$dge1[w$dge1==-Inf]<--1E-300
-w$dge1[w$dge1==+Inf]<-1E-300
-w$dge2[w$dge2==-Inf]<--1E-300
-w$dge2[w$dge2==+Inf]<-1E-300
-
 res <- mdGsa (w, gsets)
-
-quad1<-rownames(res[which(res[,5]<0.05&res[,2]>0),])
-quad2<-rownames(res[which(res[,5]<0.05&res[,2]<0),])
-quad3<-rownames(res[which(res[,6]<0.05&res[,3]>0),])
-quad4<-rownames(res[which(res[,6]<0.05&res[,3]<0),])
-
-x[[12]]<-quad1
-x[[13]]<-quad2
-x[[14]]<-quad3
-x[[15]]<-quad4
-
-gt_q1<-x[[2]]
-gt_q2<-x[[3]]
-gt_q3<-x[[4]]
-gt_q4<-x[[5]]
-
-true_pos_q1=length(intersect(quad1 , gt_q1 ))
-true_pos_q2=length(intersect(quad2 , gt_q2 ))
-true_pos_q3=length(intersect(quad3 , gt_q3 ))
-true_pos_q4=length(intersect(quad4 , gt_q4 ))
-true_pos=sum(true_pos_q1, true_pos_q2, true_pos_q3, true_pos_q4)
-
-false_pos_q1=length(setdiff(quad1 , gt_q1 ))
-false_pos_q2=length(setdiff(quad2 , gt_q2 ))
-false_pos_q3=length(setdiff(quad3 , gt_q3 ))
-false_pos_q4=length(setdiff(quad4 , gt_q4 ))
-false_pos=sum(false_pos_q1, false_pos_q2, false_pos_q3, false_pos_q4)
-
-false_neg_q1=length(setdiff(gt_q1 , quad1 ))
-false_neg_q2=length(setdiff(gt_q2 , quad2 ))
-false_neg_q3=length(setdiff(gt_q3 , quad3 ))
-false_neg_q4=length(setdiff(gt_q4 , quad4 ))
-false_neg=sum( false_neg_q1 , false_neg_q2 , false_neg_q3 , false_neg_q4)
-
+sig <- rownames(subset(res,padj.dge1 < 0.05 | padj.dge2 < 0.05 | padj.I < 0.05))
+gt <- names(x$truth)
+true_pos=length(intersect( sig , gt ))
+false_pos=length(setdiff( sig, gt  ))
+false_neg=length(setdiff(gt , sig ))
 true_neg=length(gsets)-sum(true_pos,false_pos,false_neg)
+p<-true_pos/(true_pos+false_pos)
+r<-true_pos/(true_pos+false_neg)
+f<-2*p*r/(p+r)
+attr(x,'mdgsa_res') <-data.frame(N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,DGE_FUNC,
+  true_pos,false_pos,true_neg,false_neg,p,r,f)
+x
+}
 
+#################################################
+# define MAVTgsa function
+##################################################
+run_mavtgsa<-function(x,DGE_FUNC,gsets, N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC) {
+mx <- x[[1]]
+gx <- lapply(gsets , function(x) { as.numeric( rownames (mx ) %in% x ) })
+gx <- data.frame(gx)
+samplegroups <- as.numeric(factor(sapply(strsplit(colnames(mx),"_"),"[[",1)))
+mx <- rbind(t(data.frame(samplegroups)),as.matrix(mx))
+res <- MAVTn(mx, gx, alpha = 0.05, nbPerm = 1000 )
+sig<- names(gsets)[which(res[[1]]$`MANOVA p-value`<0.05)]
+gt <- names(x$truth)
+true_pos=length(intersect( sig , gt ))
+false_pos=length(setdiff( sig, gt  ))
+false_neg=length(setdiff(gt , sig ))
+true_neg=length(gsets)-sum(true_pos,false_pos,false_neg)
 p<-true_pos/(true_pos+false_pos)
 r<-true_pos/(true_pos+false_neg)
 f<-2*p*r/(p+r)
 
-attr(x,'mdgsa_res') <-data.frame(N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,DGE_FUNC,true_pos,false_pos,true_neg,false_neg,p,r,f)
+attr(x,'mdgsa_res') <-data.frame(N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,DGE_FUNC,
+  true_pos,false_pos,true_neg,false_neg,p,r,f)
 x
 }
 
@@ -419,17 +326,15 @@ x
 # aggregate function
 ##################################
 agg_dge<-function(a,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,SIMS,DGE_FUNC,gsets) {
-library("mitch")
 SIMS=10
 
 myagg<-function(a,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,gsets) {
  x<-simrna2d(a,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,gsets)
  x<-deseq2(x)
  x<-run_mitch(x,DGE_FUNC,gsets, N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
-# x<-run_hypergeometric(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
  x<-run_fgsea(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
-# x<-run_gst(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
-# x<-run_mdgsa(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
+ x<-run_mdgsa(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
+# x<-run_mavtgsa(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC) #SSLLOOOOWWWW
 
  g=list()
  for (f in 2:length(attributes(x))) {

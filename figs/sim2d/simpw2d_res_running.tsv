@@ -1,0 +1,99 @@
+N_REPS	SUM_COUNT	VARIANCE	FRAC_DE	FC	DGE_FUNC	true_pos	false_pos	true_neg	false_neg	p	r	f	PWAY_FUNC
+1	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	NA	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	NA
+2	3	4e+07	0.3	0.05	1	deseq2	0	0	992	8	NaN	0	NaN	mitch_res
+3	3	4e+07	0.3	0.05	1	deseq2	0	6	986	8	0	0	NaN	phyper_res
+4	3	4e+07	0.3	0.05	1	deseq2	0	41	951	8	0	0	NaN	fgsea_res
+5	3	4e+07	0.3	0.05	1	deseq2	0	54	938	8	0	0	NaN	gst_res
+6	3	4e+07	0.3	0.05	1	deseq2	0	262	730	8	0	0	NaN	mdgsa_res
+7	3	4e+07	0.3	0.05	1	deseq2	0	0	992	8	NaN	0	NaN	mitch_res
+8	3	4e+07	0.3	0.05	1	deseq2	0	13	979	8	0	0	NaN	phyper_res
+9	3	4e+07	0.3	0.05	1	deseq2	0	52	940	8	0	0	NaN	fgsea_res
+10	3	4e+07	0.3	0.05	1	deseq2	0	65	927	8	0	0	NaN	gst_res
+11	3	4e+07	0.3	0.05	1	deseq2	0	258	734	8	0	0	NaN	mdgsa_res
+12	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	NA	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	NA
+13	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	NA	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	NA
+14	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	NA	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	NA
+15	3	4e+07	0.3	0.05	1	deseq2	0	0	992	8	NaN	0	NaN	mitch_res
+16	3	4e+07	0.3	0.05	1	deseq2	0	1	991	8	0	0	NaN	phyper_res
+17	3	4e+07	0.3	0.05	1	deseq2	0	45	947	8	0	0	NaN	fgsea_res
+18	3	4e+07	0.3	0.05	1	deseq2	0	52	940	8	0	0	NaN	gst_res
+19	3	4e+07	0.3	0.05	1	deseq2	0	263	729	8	0	0	NaN	mdgsa_res
+20	3	4e+07	0.3	0.05	1	deseq2	0	0	992	8	NaN	0	NaN	mitch_res
+21	3	4e+07	0.3	0.05	1	deseq2	0	10	982	8	0	0	NaN	phyper_res
+22	3	4e+07	0.3	0.05	1	deseq2	0	50	942	8	0	0	NaN	fgsea_res
+23	3	4e+07	0.3	0.05	1	deseq2	0	56	936	8	0	0	NaN	gst_res
+24	3	4e+07	0.3	0.05	1	deseq2	0	261	731	8	0	0	NaN	mdgsa_res
+25	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	NA	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	NA
+26	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	NA	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	Error in glm.fit(x = X, y = B, family = family, ...) : NA/NaN/Inf in 'x'
+	NA

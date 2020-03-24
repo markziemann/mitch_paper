@@ -20,7 +20,7 @@ gsets<-randomGeneSets(a)
 
 test_simpw2d<-function(){
  # create some random data with two contraste
- N_REPS=3 ; SUM_COUNT=10000000 ; VARIANCE=0.3 ; FRAC_DE=0.05 ; FC=1 ; DGE_FUNC="deseq2"
+ N_REPS=3 ; SUM_COUNT=40000000 ; VARIANCE=0.3 ; FRAC_DE=0.05 ; FC=1 ; DGE_FUNC="deseq2"
 
  x<-simrna2d(a,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,gsets)
 

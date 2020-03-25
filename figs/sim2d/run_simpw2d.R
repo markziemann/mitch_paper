@@ -1,14 +1,12 @@
 
 library("tidyverse")
 library("parallel")
-library("topconfects")
 library("edgeR")
 library("DESeq2")
 library("limma")
-library("ABSSeq")
 library("stringi")
 library("mdgsa")
-
+library("fgsea")
 
 source("simpw2d_func.R")
 
@@ -20,20 +18,21 @@ gsets<-randomGeneSets(a)
 
 test_simpw2d<-function(){
  # create some random data with two contraste
- N_REPS=3 ; SUM_COUNT=40000000 ; VARIANCE=0.6 ; FRAC_DE=0.05 ; FC=1 ; DGE_FUNC="deseq2"
+ N_REPS=3 ; SUM_COUNT=10000000 ; VARIANCE=0.3 ; FRAC_DE=0.05 ; FC=1 ; DGE_FUNC="deseq2" ; SIMS=10
  x<-simrna2d(a,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,gsets)
  # run the DESeq2 DE analysis
  x<-deseq2(x)
  # run mitch
- x<-run_mitch(x,DGE_FUNC,gsets, N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
+ system.time(x<-run_mitch(x,DGE_FUNC,gsets, N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC))
  # run fgsea
- x<-run_fgsea(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
+ system.time(x<-run_fgsea(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC))
  # run mdgsa
- x<-run_mdgsa(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
+ system.time(x<-run_mdgsa(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC))
+ # run mavtgsa
+ system.time(x<-run_mavtgsa(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC) ) #SSLLOOOOWWWW
  # look at the results
  str(x)
  # run the full shbang
- SIMS=10
  test1<-agg_dge(a,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,SIMS,DGE_FUNC,gsets)
 }
 

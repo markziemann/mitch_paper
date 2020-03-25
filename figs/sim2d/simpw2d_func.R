@@ -4,7 +4,7 @@ library("DESeq2")
 library("stringi")
 library("mitch")
 library("fgsea")
-library("mdgsea")
+library("mdgsa")
 library("MAVTgsa")
 library("edgeR")
 
@@ -252,10 +252,12 @@ dge1 <- x[[6]]
 dge2 <- x[[9]]
 s1 <- dge1$stat
 names(s1) <- rownames(dge1)
+s1[is.na(s1)] <- 0
 p1 <- as.data.frame(fgsea(pathways=gsets, stats=s1, nperm=1000))
 obs1 <- subset(p1,padj<0.05 )[,1]
 s2 <- dge2$stat
 names(s2) <- rownames(dge2)
+s2[is.na(s2)] <- 0
 p2 <- as.data.frame(fgsea(pathways=gsets, stats=s2, nperm=1000))
 obs2 <- subset(p2,padj<0.05 )[,1]
 obs <- union(obs1,obs2)
@@ -281,6 +283,7 @@ dge1<-x[[6]]
 dge2<-x[[9]]
 dge<-list("dge1"=dge1,"dge2"=dge2)
 w<-mitch_import(dge, DGE_FUNC )
+w[is.na(w)] <- 0
 res <- mdGsa (w, gsets)
 sig <- rownames(subset(res,padj.dge1 < 0.05 | padj.dge2 < 0.05 | padj.I < 0.05))
 gt <- names(x$truth)

@@ -1,5 +1,6 @@
 library("mitch")
 library("fgsea")
+library("mdgsa")
 library("reshape2")
 library("stringi")
 
@@ -85,6 +86,7 @@ times_f<-as.data.frame(rbind(
 times_f$cores<-cores
 times_f<-rev_df_row(times_f)
 
+# data
 write.table(times_f,file="fig7a_fgsea.tsv",sep="\t",quote=F,row.names=TRUE)
 write.table(times_m,file="fig7a_mitch.tsv",sep="\t",quote=F,row.names=TRUE)
 
@@ -102,10 +104,89 @@ mtext("1 dimension, 20000 genes, 1000 sets, 50 genes per set")
 axis(side=1,at=1:nrow(times_m),labels=times_m$cores)
 dev.off()
 
+#################################################
+# second example compare 2xfgsea mitch mdgsa and MAVtsa
+#   genes = 20000
+#   dimensions = 2,3,5
+#################################################
+
+# create the large dataset
+g50k <- randy(50000)
+k <- as.data.frame(g50k,stringsAsFactors=F)
+k$a1 <- rnorm(50000, 0, 3)
+k$a2 <- rnorm(50000, 0, 3)
+k$a3 <- rnorm(50000, 0, 3)
+k$a4 <- rnorm(50000, 0, 3)
+k$a5 <- rnorm(50000, 0, 3)
+
+rownames(k) <- k[,1]
+k[,1] = NULL
+
+k2_g20k <- k[1:20000,1:2]
+k3_g20k <- k[1:20000,1:3]
+k5_g20k <- k[1:20000,1:5]
+
+s <- sapply(rep(50,1000), function(x) {list(as.character(sample(rownames(k2_g20k),x))) } )
+names(s)<-paste("set",1:1000)
+
+mi_k2 <- system.time( res<-mitch_calc(k2_g20k,s,priority="significance",cores=8) )
+mi_k3 <- system.time( res<-mitch_calc(k3_g20k,s,priority="significance",cores=8) )
+mi_k5 <- system.time( res<-mitch_calc(k5_g20k,s,priority="significance",cores=8) )
+
+times_mi <- as.data.frame(rbind(mi_k5,
+mi_k3,
+mi_k2))
+
+s1 <- k5_g20k[,1] ; names(s1)<-rownames(k2_g20k)
+s2 <- k5_g20k[,2] ; names(s2)<-rownames(k2_g20k)
+s3 <- k5_g20k[,3] ; names(s3)<-rownames(k2_g20k)
+s4 <- k5_g20k[,4] ; names(s4)<-rownames(k2_g20k)
+s5 <- k5_g20k[,5] ; names(s5)<-rownames(k2_g20k)
+
+f_k2_a <- system.time( fgsea(pathways=s, stats=s1, nperm=1000, nproc=8) )
+f_k2_b <- system.time(fgsea(pathways=s, stats=s2, nperm=1000, nproc=8) )
+f_k2 = f_k2_a + f_k2_b
+
+f_k3_a <- system.time( fgsea(pathways=s, stats=s1, nperm=1000, nproc=8) )
+f_k3_b <- system.time( fgsea(pathways=s, stats=s2, nperm=1000, nproc=8) )
+f_k3_c <- system.time( fgsea(pathways=s, stats=s3, nperm=1000, nproc=8) )
+f_k3 = f_k3_a + f_k3_b + f_k3_c
+
+f_k5_a <- system.time( fgsea(pathways=s, stats=s1, nperm=1000, nproc=8) )
+f_k5_b <- system.time( fgsea(pathways=s, stats=s2, nperm=1000, nproc=8) )
+f_k5_c <- system.time( fgsea(pathways=s, stats=s3, nperm=1000, nproc=8) )
+f_k5_d <- system.time( fgsea(pathways=s, stats=s4, nperm=1000, nproc=8) )
+f_k5_e <- system.time( fgsea(pathways=s, stats=s5, nperm=1000, nproc=8) )
+f_k5 <- f_k5_a + f_k5_b + f_k5_c + f_k5_d + f_k5_e
+
+times_f<-as.data.frame(rbind(
+  f_k2,
+  f_k3,
+  f_k5))
+
+times_f$dims<-c(2,3,5)
+
+# data
+write.table(times_f,file="fig7a_fgsea.tsv",sep="\t",quote=F,row.names=TRUE)
+write.table(times_m,file="fig7a_mitch.tsv",sep="\t",quote=F,row.names=TRUE)
+
+times_f<-read.table("fig7a_fgsea.tsv")
+times_m<-read.table("fig7a_mitch.tsv")
+
+pdf("fig7a.pdf")
+matplot(times_m$elapsed , pch=1,type = c("b"),xlab="parallel CPU threads",ylab="elapsed time (s)" ,
+  main="Execution time",axes=F , ylim=c(0,10))
+points(times_f$elapsed, type="b",col="red")
+grid()
+axis(2)
+legend("topright",inset=0.1, legend = c("Mitch","FGSEA"), col=c("black","red"), pch=1) # optional legend
+mtext("1 dimension, 20000 genes, 1000 sets, 50 genes per set")
+axis(side=1,at=1:nrow(times_m),labels=times_m$cores)
+dev.off()
 
 
 #################################################
-# second example - vary the no genes in profile and number of dimensions
+# third example - vary the no genes in profile and number of dimensions
 #   genes = 1000 5000 20000 100000 
 #   dimensions = 3,5,10,15
 #   cores = 8

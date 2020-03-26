@@ -1,10 +1,8 @@
 library("tidyverse")
 library("parallel")
-library("topconfects")
 library("edgeR")
 library("DESeq2")
 library("limma")
-library("ABSSeq")
 library("stringi")
 
 source("simpw_func.R")

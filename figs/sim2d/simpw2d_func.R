@@ -253,12 +253,12 @@ dge2 <- x[[9]]
 s1 <- dge1$stat
 names(s1) <- rownames(dge1)
 s1[is.na(s1)] <- 0
-p1 <- as.data.frame(fgsea(pathways=gsets, stats=s1, nperm=1000))
+p1 <- as.data.frame(fgsea(pathways=gsets, stats=s1 ,nperm=2000 ))
 obs1 <- subset(p1,padj<0.05 )[,1]
 s2 <- dge2$stat
 names(s2) <- rownames(dge2)
 s2[is.na(s2)] <- 0
-p2 <- as.data.frame(fgsea(pathways=gsets, stats=s2, nperm=1000))
+p2 <- as.data.frame(fgsea(pathways=gsets, stats=s2 ,nperm=2000))
 obs2 <- subset(p2,padj<0.05 )[,1]
 obs <- union(obs1,obs2)
 gt <- names(x$truth)
@@ -329,14 +329,14 @@ x
 # aggregate function
 ##################################
 agg_dge<-function(a,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,SIMS,DGE_FUNC,gsets) {
-SIMS=10
+#SIMS=10
 
 myagg<-function(a,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,gsets) {
  x<-simrna2d(a,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,gsets)
  x<-deseq2(x)
- x<-run_mitch(x,DGE_FUNC,gsets, N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
+# x<-run_mitch(x,DGE_FUNC,gsets, N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
  x<-run_fgsea(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
- x<-run_mdgsa(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
+# x<-run_mdgsa(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC)
 # x<-run_mavtgsa(x,DGE_FUNC,gsets,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC) #SSLLOOOOWWWW
 
  g=list()
@@ -353,7 +353,7 @@ g<-RepParallel(SIMS,myagg(a,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,gsets), simplif
 g<-as.data.frame(do.call(rbind, g))
 g
 }
-# N_REPS=3 ; SUM_COUNT=40000000 ; VARIANCE=0 ; FRAC_DE=0.2 ; FC=1 ; SIMS=10 ; DGE_FUNC="deseq2" ; gsets=gsets
+# N_REPS=3 ; SUM_COUNT=40000000 ; VARIANCE=0 ; FRAC_DE=0.05 ; FC=1 ; SIMS=10 ; DGE_FUNC="deseq2" ; gsets=gsets
 # res<-agg_dge(a,N_REPS,SUM_COUNT,VARIANCE,FRAC_DE,FC,SIMS,DGE_FUNC,gsets)
 # res<-agg_dge(a,10,40000000,0.4,0.2,1,10,"deseq2",gsets) 
 

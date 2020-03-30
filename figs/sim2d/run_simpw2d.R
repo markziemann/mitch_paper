@@ -39,7 +39,7 @@ test_simpw2d<-function(){
 ###############################################
 # run simulations over a range of parameters
 ###############################################
-SIMS=10
+SIMS=500
 unlink("simpw2d_res_running.tsv")
 res=NULL
 for ( FRAC_DE in c(0.05)) {

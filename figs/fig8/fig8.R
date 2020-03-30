@@ -3,6 +3,8 @@ library("fgsea")
 library("mdgsa")
 library("reshape2")
 library("stringi")
+library("mdgsa")
+library("MAVTgsa")
 
 ########################################
 # randy makes random gene names
@@ -25,8 +27,6 @@ gsets
 rev_df_row<-function(df){
     df[seq(dim(df)[1],1),]
 }
-
-
 
 #################################################
 # first example - compare mitch and fgsea
@@ -129,14 +129,18 @@ k5_g20k <- k[1:20000,1:5]
 s <- sapply(rep(50,1000), function(x) {list(as.character(sample(rownames(k2_g20k),x))) } )
 names(s)<-paste("set",1:1000)
 
+# mitch
 mi_k2 <- system.time( res<-mitch_calc(k2_g20k,s,priority="significance",cores=8) )
 mi_k3 <- system.time( res<-mitch_calc(k3_g20k,s,priority="significance",cores=8) )
 mi_k5 <- system.time( res<-mitch_calc(k5_g20k,s,priority="significance",cores=8) )
 
-times_mi <- as.data.frame(rbind(mi_k5,
+times_mi <- as.data.frame(rbind(mi_k2,
 mi_k3,
-mi_k2))
+mi_k5))
 
+times_mi$dims<-c(2,3,5)
+
+# fgsea
 s1 <- k5_g20k[,1] ; names(s1)<-rownames(k2_g20k)
 s2 <- k5_g20k[,2] ; names(s2)<-rownames(k2_g20k)
 s3 <- k5_g20k[,3] ; names(s3)<-rownames(k2_g20k)
@@ -166,24 +170,74 @@ times_f<-as.data.frame(rbind(
 
 times_f$dims<-c(2,3,5)
 
+# mdgsa
+md_k2 <- system.time( res <- mdGsa (k2_g20k, s) )
+md_k3 <- system.time( res <- mdGsa (k3_g20k, s) )
+md_k5 <- system.time( res <- mdGsa (k5_g20k, s) )
+
+times_md <- as.data.frame(rbind(md_k2,
+md_k3,
+md_k5))
+
+times_md$dims<-c(2,3,5)
+
+# MAVTgsa
+mx = NULL
+for (k in paste0("data", 1:18 ))  {
+        b <- as.data.frame( sample(1:nrow(k1),nrow(k1),replace=TRUE) )
+        #b <- thinCounts(a,target.size = SUM_COUNT)
+        colnames(b) = k
+        if ( is.null(mx) ) { mx <- b }
+        else { mx = cbind(mx,b) }
+     }
+
+rownames(mx) <- rownames(k1)
+s <- sapply(rep(50,1000), function(x) {list(as.character(sample(rownames(mx),x))) } )
+names(s)<-paste("set",1:1000)
+gx <- lapply(s , function(x) { as.numeric( rownames (mx ) %in% x ) })
+gx <- data.frame(gx)
+samplegroups <- as.vector(sapply(1:6 ,function(x) { rep(x,3) } ))
+mx <- rbind(t(data.frame(samplegroups)),as.matrix(mx))
+
+mx2 <- mx[,1:9]
+mx3 <- mx[,1:12]
+mx5 <- mx
+ma_k2 <- system.time(  res <- MAVTn(mx2, gx, alpha = 0.05, nbPerm = 1000 ) )
+ma_k3 <- system.time(  res <- MAVTn(mx3, gx, alpha = 0.05, nbPerm = 1000 ) )
+ma_k5 <- system.time(  res <- MAVTn(mx5, gx, alpha = 0.05, nbPerm = 1000 ) )
+
+times_ma <- as.data.frame(rbind(ma_k5,
+ma_k3,
+ma_k2))
+
+times_ma$dims<-c(2,3,5)
+
 # data
-write.table(times_f,file="fig7a_fgsea.tsv",sep="\t",quote=F,row.names=TRUE)
-write.table(times_m,file="fig7a_mitch.tsv",sep="\t",quote=F,row.names=TRUE)
+write.table(times_f,file="fig7x_fgsea.tsv",sep="\t",quote=F,row.names=TRUE)
+write.table(times_mi,file="fig7x_mitch.tsv",sep="\t",quote=F,row.names=TRUE)
+write.table(times_md,file="fig7x_mdgsa.tsv",sep="\t",quote=F,row.names=TRUE)
+write.table(times_ma,file="fig7x_MAVTgsa.tsv",sep="\t",quote=F,row.names=TRUE)
 
-times_f<-read.table("fig7a_fgsea.tsv")
-times_m<-read.table("fig7a_mitch.tsv")
+times_f <- read.table("fig7x_fgsea.tsv")
+times_mi <- read.table("fig7x_mitch.tsv")
+times_md <- read.table("fig7x_mdgsa.tsv")
+times_ma <- read.table("fig7x_MAVTgsa.tsv")
 
-pdf("fig7a.pdf")
-matplot(times_m$elapsed , pch=1,type = c("b"),xlab="parallel CPU threads",ylab="elapsed time (s)" ,
-  main="Execution time",axes=F , ylim=c(0,10))
-points(times_f$elapsed, type="b",col="red")
+
+
+pdf("fig7x.pdf")
+matplot(times_md$elapsed , pch=19 ,type = c("b"),xlab="no. contrasts",ylab="elapsed time (s)" ,
+  main="Execution time",axes=F , ylim=c(0.1,11000), col="blue" , log="y")
+points(times_ma$elapsed, type="b",col="darkgreen",pch=19)
+points(times_f$elapsed, type="b",col="red", pch=19)
+points(times_mi$elapsed, type="b",col="black",pch=19)
 grid()
 axis(2)
-legend("topright",inset=0.1, legend = c("Mitch","FGSEA"), col=c("black","red"), pch=1) # optional legend
-mtext("1 dimension, 20000 genes, 1000 sets, 50 genes per set")
-axis(side=1,at=1:nrow(times_m),labels=times_m$cores)
+legend("topleft",inset=0.1, legend = c("MAVTgsa","mdgsa","mitch","FGSEA"),
+ col=c("darkgreen","blue","black","red"), pch=1) # optional legend
+mtext("20000 genes, 1000 sets, 50 genes per set")
+axis(side=1,at=1:nrow(times_mi),labels=times_mi$dims)
 dev.off()
-
 
 #################################################
 # third example - vary the no genes in profile and number of dimensions

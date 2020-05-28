@@ -14,7 +14,7 @@ library("DESeq2")
 ##################################################
 mdat<-getDee2Metadata("hsapiens")
 
-SRP128998
+#SRP128998
 samplesheet<-mdat[which(mdat$GEO_series=="GSE109140"),]
 samplesheet<-samplesheet[order(samplesheet$SRR_accession),]
 samplesheet$HG<-as.factor(c(1,1,1,1,1,1,0,0,0,0,0,0))

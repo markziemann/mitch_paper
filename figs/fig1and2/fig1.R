@@ -4,7 +4,7 @@
 #devtools::install_github("hrbrmstr/taucharts")
 
 library("devtools")
-library("getDEE2")
+library("getDEE2") # install getDEE2_0.0.4 with devtools::install_github("markziemann/dee2/getDEE2")
 library("mitch")
 library("DESeq2")
 
@@ -13,16 +13,19 @@ library("DESeq2")
 # Obtain gene expression counts and run DESeq2
 ##################################################
 mdat<-getDee2Metadata("hsapiens")
-samplesheet<-mdat[which(mdat$GSE_accession=="GSE109140"),]
+
+SRP128998
+samplesheet<-mdat[which(mdat$GEO_series=="GSE109140"),]
 samplesheet<-samplesheet[order(samplesheet$SRR_accession),]
-samplesheet$HG<-as.factor(as.numeric(grepl("high",samplesheet$experiment_title)))
-samplesheet$VPA<-as.factor(as.numeric(grepl("VPA",samplesheet$experiment_title)))
+samplesheet$HG<-as.factor(c(1,1,1,1,1,1,0,0,0,0,0,0))
+samplesheet$VPA<-as.factor(c(0,0,0,1,1,1,0,0,0,1,1,1))
 
 # samplesheets for the 2 contrasts
-s1<-samplesheet[grep("VPA",samplesheet$experiment_title,invert=T),]
-s2<-samplesheet[grep("high",samplesheet$experiment_title),]
+s1 <- subset(samplesheet,VPA==0)
+s2 <- subset(samplesheet,HG==1)
 
-w<-getDEE2("hsapiens",samplesheet$SRR_accession)
+
+w<-getDEE2("hsapiens",samplesheet$SRR_accession,metadata=mdat)
 x<-Tx2Gene(w)
 x<-x$Tx2Gene
 
@@ -58,7 +61,8 @@ d<-mitch_import(d,DEtype="deseq2",geneTable=gt)
 ##################################################
 # get the gene sets and import
 ##################################################
-download.file("https://reactome.org/download/current/ReactomePathways.gmt.zip", destfile="ReactomePathways.gmt.zip")
+download.file("https://reactome.org/download/current/ReactomePathways.gmt.zip", 
+    destfile="ReactomePathways.gmt.zip")
 unzip("ReactomePathways.gmt.zip")
 genesets<-gmt_import("ReactomePathways.gmt")
 
